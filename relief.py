@@ -1,8 +1,8 @@
 import random
 import numpy as np
 import pandas as pd
+from  Consts import inf
 
-INF = 10000
 def relief_nearst_miss(X: np.ndarray, Y: np.ndarray, index: int):
     tag = Y[index]
     value = X[index]
@@ -14,7 +14,7 @@ def relief_nearst_hit(X: np.ndarray, Y: np.ndarray, index: int):
     tag = Y[index]
     value = X[index]
     relevant_locations = np.argwhere(Y==tag)
-    closest_location = min(relevant_locations, key= lambda x: abs(value - X[x[0]]) if index != x[0] else INF)
+    closest_location = min(relevant_locations, key= lambda x: abs(value - X[x[0]]) if index != x[0] else inf)
     return value - X[closest_location[0]]
 
 
