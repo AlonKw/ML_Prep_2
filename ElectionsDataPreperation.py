@@ -31,7 +31,7 @@ class ElectionsDataPreperation:
     def loadAndImpute(self, lDataTypes=None):
         """ lDataTypes is a list with following values ['test', 'validation']
         """
-        self._loadData(lDataTypes)
+        self.loadData(lDataTypes)
         self._changeStringToValues(lDataTypes)
         # first we impute train
         self._dataImpute(self.trainData, self.trainData, self.sInputFileTrain)
@@ -42,7 +42,7 @@ class ElectionsDataPreperation:
         if ('validation' in lDataTypes):
             self._dataImpute(self.trainData, self.valData, self.sInputFileVal)
 
-    def _loadData(self, lDataTypes = []):
+    def loadData(self, lDataTypes = []):
         trainFileName = self.sInputFileTrain +'.csv'
         self.trainDataset = read_csv(trainFileName, header=0, keep_default_na=True)
         self.trainData = self.trainDataset.loc[:, self.trainDataset.columns != 'Vote']
@@ -221,6 +221,10 @@ class ElectionsDataPreperation:
 
         return result
 
+    @staticmethod
+    def fixNegativeVals(df: pd.DataFrame) -> None:
+        df[Consts.listFixNegateVals] = np.absolute(df[Consts.listFixNegateVals])
+
 # end class ElectionsDataPreparation
 
 class DataSplit:
@@ -289,7 +293,7 @@ class DataSplit:
 if __name__ == '__main__':
 
     firstSetPrep = ElectionsDataPreperation('datasets/1/X_train1No_Nan', 'datasets/1/X_val1No_Nan', 'datasets/1/X_test1No_Nan')
-    firstSetPrep._loadData()
+    firstSetPrep.loadData()
     firstSetPrep.removeAbove95Corr()
     # load train labels
     firstSetPrep.trainLabels = pd.read_csv('datasets/1/Y_train1.csv', header=0, keep_default_na=True, index_col=False)

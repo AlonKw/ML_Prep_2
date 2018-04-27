@@ -15,12 +15,12 @@ class ScaleData:
 
             elif feature in Consts.setUniformFeatures:
                 min_val, max_val = t["min"], t["max"]
-                df[feature + scaled] = (df[feature] - min_val) * 2 / (max_val - min_val) + min_val
+                df[feature + scaled] = (df[feature] - min_val) * 2 / (max_val - min_val) - 1
                 self.scale_args[feature] = (min_val, max_val)
         # df = df.drop(Consts.setUniformFeatures.union(Consts.setGaussianFeatures), axis=1)
 
     def scale_test(self, df: pd.DataFrame) -> None:
-        scaled = "_scaled"      # type: str
+        scaled = ""   # "_scaled"
         for feature in df.keys():
             if feature in Consts.setGaussianFeatures:
                 miu, sigma = self.scale_args[feature]

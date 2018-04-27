@@ -41,9 +41,13 @@ setUniformFeatures = {'Occupation_Satisfaction',
                       '%Time_invested_in_work',
                       "Last_school_grades",
                       '%_satisfaction_financial_policy',
-                      '%Of_Household_Income',
+                      '%Of_Household_Income'
                       }
 
-
+listFixNegateVals = [
+    'Avg_monthly_expense_when_under_age_21',
+    'AVG_lottary_expanses',
+    'Avg_Satisfaction_with_previous_vote'
+]
 
 inf = 10000
