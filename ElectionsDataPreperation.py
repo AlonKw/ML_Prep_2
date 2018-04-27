@@ -4,6 +4,7 @@ import pandas as pd
 import os
 from pandas import read_csv, to_numeric, Series
 from sklearn.model_selection import train_test_split
+from matplotlib import pyplot as plt
 
 
 
@@ -289,20 +290,34 @@ if __name__ == '__main__':
     firstSetPrep._loadData()
     firstSetPrep.removeAbove95Corr()
     # load train labels
-    firstSetPrep.trainLabels = pd.read_csv('datasets/1/Y_train1.csv', header=0, keep_default_na=True)
+    firstSetPrep.trainLabels = pd.read_csv('datasets/1/Y_train1.csv', header=0, keep_default_na=True, index_col=False)
     firstSetPrep.trainLabels['Vote'] = firstSetPrep.trainLabels['Vote'].map({'Greens': 10, 'Pinks': 9, 'Purples': 8,
                                                                              'Blues': 7, 'Whites': 6, 'Browns': 5,
                                                                              'Yellows': 4, 'Reds': 3, 'Turquoises': 2,
                                                                              'Greys': 1, 'Oranges': 11})
     firstSetPrep.trainLabels = firstSetPrep.trainLabels.loc[:, firstSetPrep.trainLabels.columns == 'Vote']
+    firstSetPrep.trainData.hist(column='Avg_monthly_income_all_years', bins=500)
 
-    # sfs first check
-    from sklearn.ensemble import RandomForestClassifier
-    rForest = RandomForestClassifier()
-    from sfs import sequential_forward_selection
-    sequential_forward_selection(rForest, firstSetPrep.trainData, firstSetPrep.trainLabels, 24)
+    plt.show()
 
-    # sfs second check
+
+
+
+
+
+
+
+
+
+    #
+    # # sfs first check
+    # from sklearn.ensemble import RandomForestClassifier
+    # rForest = RandomForestClassifier(random_state=0)
+    # from sfs import sequential_forward_selection
+    # _, bestFeatures = sequential_forward_selection(rForest, firstSetPrep.trainData, firstSetPrep.trainLabels, 4)
+    # firstSetPrep.trainData = firstSetPrep.trainData[bestFeatures]
+    #
+    # # sfs second check
 
 
 

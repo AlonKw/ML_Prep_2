@@ -11,20 +11,21 @@ def sequential_forward_selection(clf, X: pd.DataFrame, y: pd.DataFrame, k) -> li
     :return: a dict indexed by int's, each entry contains a set of the best features selected for this entry.
     """
 
+
+    X = X.loc[:, X.columns != 'Unnamed: 0']
     base = [feature for feature in X.keys()]
+    print(base)
     bestIndexes = dict()
     bestScores = dict()
-    print(base)
     X = X.as_matrix()
     y = y.as_matrix().ravel()
     currScore = 0
-    for i in range(1, k):
+    for i in range(k):
         bestScore = 0
-        bestIndex = 1
-        for j in range(1, len(base)):
+        for j in range(0, len(base)):
             if j in bestIndexes.values():
                 continue
-            currIndexes = [x for x in bestIndexes]
+            currIndexes = [bestIndexes[k] for k in range(i)]
             currIndexes.append(j)
             currX = X[:, currIndexes]
             tempScore = metrics.accuracy_score(y, cross_val_predict(clf, currX, y, cv=3))
@@ -38,5 +39,10 @@ def sequential_forward_selection(clf, X: pd.DataFrame, y: pd.DataFrame, k) -> li
         print(bestIndexes)
         print(bestFeatures)
         print(bestScores)
-    bestFeatures = [base[i] for i in range(len(base)) if i in bestIndexes.values()]
-    return bestIndexes
+    indexByOrder = []
+    bestFeatures = []
+    for k in bestIndexes.keys():
+        indexByOrder.append(bestIndexes[k])
+        bestFeatures.append(base[bestIndexes[k]])
+    # bestFeatures = [base[i] for i in range(len(base)) if i in indexByOrder]
+    return indexByOrder, bestFeatures

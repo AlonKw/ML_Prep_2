@@ -14,4 +14,16 @@ setNumericFeatures = {'Avg_monthly_expense_when_under_age_21', 'AVG_lottary_expa
                          'Number_of_valued_Kneset_members', 'Overall_happiness_score', 'Num_of_kids_born_last_10_years',
                          'Age_group_int', 'Occupation_Satisfaction', 'Will_vote_only_large_party_int'}
 
+setGaussianFeatures ={ 'Avg_Satisfaction_with_previous_vote', 'Garden_sqr_meter_per_person_in_residancy_area',
+                       'Yearly_IncomeK', 'Avg_monthly_expense_on_pets_or_plants', 'Avg_monthly_household_cost',
+                       'Phone_minutes_10_years', 'Avg_size_per_room', 'Weighted_education_rank',
+                       'Number_of_differnt_parties_voted_for', 'Political_interest_Total_Score', 'Overall_happiness_score',
+                       }
+
+setUniformFeatures = {'Occupation_Satisfaction', 'Avg_government_satisfaction', 'Avg_education_importance',
+                      'Avg_environmental_importance', 'Avg_Residancy_Altitude', 'Yearly_ExpensesK', '%Time_invested_in_work',
+                      'uniform'}
+
+
+
 inf = 10000
