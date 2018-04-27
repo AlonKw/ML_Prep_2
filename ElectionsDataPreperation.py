@@ -49,6 +49,7 @@ class ElectionsDataPreperation:
         if ('validation' in lDataTypes):
             self._dataImpute(self.trainData, self.valData, self.sInputFileVal)
 
+
     def loadData(self, lDataTypes = []):
         """lDataTypes is a list with following values ['test', 'validation'], the list determines if the data load,
         renaming and imputation will happen on the test and validation sets
@@ -316,4 +317,10 @@ if __name__ == '__main__':
                                             'datasets/1/Y_val1', 'datasets/1/Y_test1')
 
     firstSetPrep.loadAndImpute(['test', 'validation'])
+
+    from sklearn.ensemble import RandomForestClassifier
+    rClf = RandomForestClassifier()
+    from sfs import sfsAux
+    bestFeatures = sfsAux(rClf, firstSetPrep.trainData, firstSetPrep.trainLabels, 23)
+    firstSetPrep.trainData = firstSetPrep.trainData[bestFeatures]
 
