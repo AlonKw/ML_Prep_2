@@ -112,6 +112,7 @@ class ElectionsDataPreperation:
                                                                                  'Yellows': 4, 'Reds': 3,
                                                                                  'Turquoises': 2,
                                                                                  'Greys': 1, 'Oranges': 11})
+        self.trainLabels.to_csv(self.sInputFileTrainLabel + 'Numeric.csv')
 
         if ('validation' in lDataTypes):
             self.valLabels['Vote'] = self.valLabels['Vote'].map({'Greens': 10, 'Pinks': 9, 'Purples': 8,
@@ -119,12 +120,14 @@ class ElectionsDataPreperation:
                                                                                  'Yellows': 4, 'Reds': 3,
                                                                                  'Turquoises': 2,
                                                                                  'Greys': 1, 'Oranges': 11})
+            self.valLabels.to_csv(self.sInputFileValLabel + 'Numeric.csv')
         if ('test' in lDataTypes):
             self.testLabels['Vote'] = self.testLabels['Vote'].map({'Greens': 10, 'Pinks': 9, 'Purples': 8,
                                                                                  'Blues': 7, 'Whites': 6, 'Browns': 5,
                                                                                  'Yellows': 4, 'Reds': 3,
                                                                                  'Turquoises': 2,
                                                                                  'Greys': 1, 'Oranges': 11})
+            self.testLabels.to_csv(self.sInputFileTestLabel + 'Numeric.csv')
 
     def _dataImpute(self, trainData, imputeData, sFileName):
         data_with_NaN = imputeData.isnull().any(axis=1)
