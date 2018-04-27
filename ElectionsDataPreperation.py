@@ -11,16 +11,21 @@ from matplotlib import pyplot as plt
 class ElectionsDataPreperation:
     """ main class that is used for data preperation
     """
-    scaling_data = dict()
 
-    def __init__(self, sInputFileTrain, sInputFileVal, sInputFileTest):
+    def __init__(self, sInputFileTrain, sInputFileVal, sInputFileTest, sInputFileTrainLabel, sInputFileValLabel,
+                 sInputFileTestLabel):
+
+        # fields that contain path to X files of train, val and test
         self.sInputFileTrain = sInputFileTrain
         self.sInputFileVal = sInputFileVal
         self.sInputFileTest = sInputFileTest
-        self.data = None
-        self.trainDataset = None
-        self.valDataset = None
-        self.testDataset=None
+
+        # fields that contain path to y files of train, val, test
+        self.sInputFileTrainLabel = sInputFileTrainLabel
+        self.sInputFileValLabel = sInputFileValLabel
+        self.sInputFileTestLabel = sInputFileTestLabel
+
+        # fields that contain x and Y for train, test and validation
         self.trainData = None
         self.trainLabels = None
         self.valData = None
@@ -29,10 +34,12 @@ class ElectionsDataPreperation:
         self.testLabels = None
 
     def loadAndImpute(self, lDataTypes=None):
-        """ lDataTypes is a list with following values ['test', 'validation']
+        """ lDataTypes is a list with following values ['test', 'validation'], the list determines if the data load,
+        renaming and imputation will happen on the test and validation sets
         """
         self.loadData(lDataTypes)
         self._changeStringToValues(lDataTypes)
+        self._changeVoteToNumber(lDataTypes)
         # first we impute train
         self._dataImpute(self.trainData, self.trainData, self.sInputFileTrain)
 
@@ -43,50 +50,81 @@ class ElectionsDataPreperation:
             self._dataImpute(self.trainData, self.valData, self.sInputFileVal)
 
     def loadData(self, lDataTypes = []):
-        trainFileName = self.sInputFileTrain +'.csv'
-        self.trainDataset = read_csv(trainFileName, header=0, keep_default_na=True)
-        self.trainData = self.trainDataset.loc[:, self.trainDataset.columns != 'Vote']
-        self.trainLabels = self.trainDataset.loc[:, self.trainDataset.columns == 'Vote']
+        """lDataTypes is a list with following values ['test', 'validation'], the list determines if the data load,
+        renaming and imputation will happen on the test and validation sets
+        """
+        trainFileNameX = self.sInputFileTrain + '.csv'
+        self.trainData = read_csv(trainFileNameX, header=0, keep_default_na=True)
+        trainFileNameY = self.sInputFileTrainLabel + '.csv'
+        self.trainLabels = read_csv(trainFileNameY, header=0)
 
         if ('test' in lDataTypes):
-            testFileName = self.sInputFileTest + '.csv'
-            self.testDataset = read_csv(testFileName, header=0, keep_default_na=True)
-            self.testData = self.testDataset.loc[:, self.testDataset.columns != 'Vote']
-            self.testLabels = self.testDataset.loc[:, self.testDataset.columns == 'Vote']
+            testFileNameX = self.sInputFileTest + '.csv'
+            self.testData = read_csv(testFileNameX, header=0, keep_default_na=True)
+            testFileNameY = self.sInputFileTestLabel + '.csv'
+            self.testLabels = read_csv(testFileNameY, header=0)
 
         if ('validation' in lDataTypes):
-            valFileName = self.sInputFileVal+ '.csv'
-            self.valDataDataset = read_csv(valFileName, header=0, keep_default_na=True)
-            self.valData = self.valDataDataset.loc[:, self.valDataDataset.columns != 'Vote']
-            self.valLabels = self.valDataDataset.loc[:, self.valDataDataset.columns == 'Vote']
+            valFileNameX = self.sInputFileVal + '.csv'
+            self.valData = read_csv(valFileNameX, header=0, keep_default_na=True)
+            valFileNameY = self.sInputFileValLabel + '.csv'
+            self.valLabels = read_csv(valFileNameY, header=0)
 
     def _changeStringToValues(self, lDataTypes):
+        """lDataTypes is a list with following values['test', 'validation'], the list determines if the
+        _changeStringToValues will happen on the test and validation sets.
+        After the change, the files are saved with Numeric suffix
+        """
+        self._changeStringToValuesAux(self.trainData, self.sInputFileTrain)
         self._fillBoolValues(self.trainData)
         self._fillTrioValues(self.trainData)
         self._fillHotSpot(self.trainData, Consts.listSymbolicColumns)
         # remove previous columns containing strings
         self.trainData = self.trainData.drop(Consts.listNonNumeric, axis=1)
         self.trainData = self.trainData.drop(self.trainData.columns[0], axis=1)
+        ElectionsDataPreperation.fixNegativeVals(self.trainData)
         trainPath = self.sInputFileTrain + 'Numeric.csv'
         self.trainData.to_csv(trainPath)
 
         if ('test' in lDataTypes):
-            self._fillBoolValues(self.testData)
-            self._fillTrioValues(self.testData)
-            self._fillHotSpot(self.testData, Consts.listSymbolicColumns)
-            self.testData = self.testData.drop(Consts.listNonNumeric, axis=1)
-            self.testData = self.testData.drop(self.testData.columns[0], axis=1)
-            testPath = self.sInputFileTest + 'Numeric.csv'
-            self.testData.to_csv(testPath)
+            self._changeStringToValuesAux(self.testData, self.sInputFileTest)
 
         if ('validation' in lDataTypes):
-            self._fillBoolValues(self.valData)
-            self._fillTrioValues(self.valData)
-            self._fillHotSpot(self.valData, Consts.listSymbolicColumns)
-            self.valData = self.valData.drop(Consts.listNonNumeric, axis=1)
-            self.valData = self.valData.drop(self.valData.columns[0], axis=1)
-            valPath = self.sInputFileVal + 'Numeric.csv'
-            self.valData.to_csv(valPath)
+            self._changeStringToValuesAux(self.valData, self.sInputFileVal)
+
+    def _changeStringToValuesAux(self, data, sInputFilePath):
+        self._fillBoolValues(data)
+        self._fillTrioValues(data)
+        self._fillHotSpot(data, Consts.listSymbolicColumns)
+        # remove previous columns containing strings
+        data = data.drop(Consts.listNonNumeric, axis=1)
+        data = data.drop(data.columns[0], axis=1)
+        ElectionsDataPreperation.fixNegativeVals(data)
+        Path = sInputFilePath + 'Numeric.csv'
+        data.to_csv(Path)
+
+    def _changeVoteToNumber(self, lDataTypes=None):
+        """lDataTypes is a list with following values['test', 'validation'], the list determines if the
+        _changeVoteToNumber will happen on the test and validation sets.
+        """
+        self.trainLabels['Vote'] = self.trainLabels['Vote'].map({'Greens': 10, 'Pinks': 9, 'Purples': 8,
+                                                                                 'Blues': 7, 'Whites': 6, 'Browns': 5,
+                                                                                 'Yellows': 4, 'Reds': 3,
+                                                                                 'Turquoises': 2,
+                                                                                 'Greys': 1, 'Oranges': 11})
+
+        if ('validation' in lDataTypes):
+            self.valLabels['Vote'] = self.valLabels['Vote'].map({'Greens': 10, 'Pinks': 9, 'Purples': 8,
+                                                                                 'Blues': 7, 'Whites': 6, 'Browns': 5,
+                                                                                 'Yellows': 4, 'Reds': 3,
+                                                                                 'Turquoises': 2,
+                                                                                 'Greys': 1, 'Oranges': 11})
+        if ('test' in lDataTypes):
+            self.testLabels['Vote'] = self.testLabels['Vote'].map({'Greens': 10, 'Pinks': 9, 'Purples': 8,
+                                                                                 'Blues': 7, 'Whites': 6, 'Browns': 5,
+                                                                                 'Yellows': 4, 'Reds': 3,
+                                                                                 'Turquoises': 2,
+                                                                                 'Greys': 1, 'Oranges': 11})
 
     def _dataImpute(self, trainData, imputeData, sFileName):
         data_with_NaN = imputeData.isnull().any(axis=1)
@@ -160,27 +198,6 @@ class ElectionsDataPreperation:
                 dMapping['NA'] = np.nan
                 data[feature + '_' + category] = data[feature].map(dMapping)
 
-    def _changeVoteToNumber(self, lDataTypes=None):
-
-        self.trainLabels['Vote'] = self.trainLabels['Vote'].map({'Greens': 10, 'Pinks': 9, 'Purples': 8,
-                                                                                 'Blues': 7, 'Whites': 6, 'Browns': 5,
-                                                                                 'Yellows': 4, 'Reds': 3,
-                                                                                 'Turquoises': 2,
-                                                                                 'Greys': 1, 'Oranges': 11})
-
-        if ('validation' in lDataTypes):
-            self.valLabels['Vote'] = self.valLabels['Vote'].map({'Greens': 10, 'Pinks': 9, 'Purples': 8,
-                                                                                 'Blues': 7, 'Whites': 6, 'Browns': 5,
-                                                                                 'Yellows': 4, 'Reds': 3,
-                                                                                 'Turquoises': 2,
-                                                                                 'Greys': 1, 'Oranges': 11})
-        if ('test' in lDataTypes):
-            self.testLabels['Vote'] = self.testLabels['Vote'].map({'Greens': 10, 'Pinks': 9, 'Purples': 8,
-                                                                                 'Blues': 7, 'Whites': 6, 'Browns': 5,
-                                                                                 'Yellows': 4, 'Reds': 3,
-                                                                                 'Turquoises': 2,
-                                                                                 'Greys': 1, 'Oranges': 11})
-
     def _distFeature(self, xi, yi, r, isContinues):
         """computed distance between features
         """
@@ -206,7 +223,6 @@ class ElectionsDataPreperation:
         upper.to_csv(self.sInputFileTest+ 'CorrMatrix.csv')
         to_drop = [column for column in upper.columns if any(upper[column] > 0.95)]
         self.trainData = self.trainData.drop(to_drop, axis=1)
-        # self.trainData.to_csv(self.sInputFileTest+ 'Corr')
 
     def sequential_baskward_selection(df: pd.DataFrame, J: callable) -> dict:
         base = {feature for feature in df.keys()}
@@ -292,16 +308,9 @@ class DataSplit:
 
 if __name__ == '__main__':
 
-    firstSetPrep = ElectionsDataPreperation('datasets/1/X_train1No_Nan', 'datasets/1/X_val1No_Nan', 'datasets/1/X_test1No_Nan')
-    firstSetPrep.loadData()
-    firstSetPrep.removeAbove95Corr()
-    # load train labels
-    firstSetPrep.trainLabels = pd.read_csv('datasets/1/Y_train1.csv', header=0, keep_default_na=True, index_col=False)
-    firstSetPrep.trainLabels['Vote'] = firstSetPrep.trainLabels['Vote'].map({'Greens': 10, 'Pinks': 9, 'Purples': 8,
-                                                                             'Blues': 7, 'Whites': 6, 'Browns': 5,
-                                                                             'Yellows': 4, 'Reds': 3, 'Turquoises': 2,
-                                                                             'Greys': 1, 'Oranges': 11})
-    firstSetPrep.trainLabels = firstSetPrep.trainLabels.loc[:, firstSetPrep.trainLabels.columns == 'Vote']
-    firstSetPrep.trainData.hist(column='Avg_monthly_income_all_years', bins=500)
+    firstSetPrep = ElectionsDataPreperation('datasets/1/X_train1', 'datasets/1/X_val1',
+                                            'datasets/1/X_test1', 'datasets/1/Y_train1',
+                                            'datasets/1/Y_val1', 'datasets/1/Y_test1')
 
-    plt.show()
+    firstSetPrep.loadAndImpute(['test', 'validation'])
+
