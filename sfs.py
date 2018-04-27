@@ -18,12 +18,13 @@ def sequential_forward_selection(clf, X: pd.DataFrame, y: pd.DataFrame, k) -> li
     bestScores = dict()
     X = X.as_matrix()
     y = y.as_matrix().ravel()
+
     for i in range(k):
         bestScore = 0
         for j in range(0, len(base)):
             if j in bestIndexes.values():
                 continue
-            currIndexes = [bestIndexes[k] for k in range(i)]
+            currIndexes = [bestIndexes[l] for l in range(i)]
             currIndexes.append(j)
             currX = X[:, currIndexes]
             tempScore = metrics.accuracy_score(y, cross_val_predict(clf, currX, y, cv=3))

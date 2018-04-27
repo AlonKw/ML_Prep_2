@@ -28,6 +28,6 @@ class ScaleData:
 
             elif feature in Consts.setUniformFeatures:
                 min_val, max_val = self.scale_args[feature]
-                df[feature + scaled] = (df[feature] - min_val) * 2 / (max_val - min_val) + min_val
+                df[feature + scaled] = (df[feature] - min_val) * 2 / (max_val - min_val) - 1
 
-        df = df.drop(Consts.setUniformFeatures.union(Consts.setGaussianFeatures), axis=1)
+        # df = df.drop(Consts.setUniformFeatures.union(Consts.setGaussianFeatures), axis=1)

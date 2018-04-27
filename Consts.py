@@ -50,6 +50,9 @@ listFixNegateVals = [
     'Avg_Satisfaction_with_previous_vote'
 ]
 
+listAdditionalDataPreparation = ["test", "validation"]
+
+
 inf = 10000
 RAW_FILE_PATH = 'https://webcourse.cs.technion.ac.il/236756/Spring2018/ho/WCFiles/ElectionsData.csv'
 RAW_SPLIT_FILE_DIRECTORY = "datasets"
