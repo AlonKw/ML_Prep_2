@@ -35,7 +35,3 @@ def relief_alg(X: pd.DataFrame, Y: pd.DataFrame,N: int, tau: float) -> set:
             result.add(feature)
 
     return result
-
-
-
-
