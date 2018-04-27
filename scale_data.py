@@ -5,7 +5,7 @@ class ScaleData:
     scale_args = dict()
 
     def scale_train(self, df: pd.DataFrame) -> None:
-        scaled = "_scaled"
+        scaled = "" # ""_scaled"
         for feature in df.keys():
             t = df[feature].describe().transpose()
             if feature in Consts.setGaussianFeatures:
@@ -17,7 +17,7 @@ class ScaleData:
                 min_val, max_val = t["min"], t["max"]
                 df[feature + scaled] = (df[feature] - min_val) * 2 / (max_val - min_val) + min_val
                 self.scale_args[feature] = (min_val, max_val)
-        df.drop(Consts.setUniformFeatures.union(Consts.setGaussianFeatures))
+        # df = df.drop(Consts.setUniformFeatures.union(Consts.setGaussianFeatures), axis=1)
 
     def scale_test(self, df: pd.DataFrame) -> None:
         scaled = "_scaled"      # type: str
@@ -30,4 +30,4 @@ class ScaleData:
                 min_val, max_val = self.scale_args[feature]
                 df[feature + scaled] = (df[feature] - min_val) * 2 / (max_val - min_val) + min_val
 
-        df.drop(Consts.setUniformFeatures.union(Consts.setGaussianFeatures))
+        df = df.drop(Consts.setUniformFeatures.union(Consts.setGaussianFeatures), axis=1)

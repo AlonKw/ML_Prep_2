@@ -11,6 +11,8 @@ from matplotlib import pyplot as plt
 class ElectionsDataPreperation:
     """ main class that is used for data preperation
     """
+    scaling_data = dict()
+
     def __init__(self, sInputFileTrain, sInputFileVal, sInputFileTest):
         self.sInputFileTrain = sInputFileTrain
         self.sInputFileVal = sInputFileVal
@@ -136,17 +138,17 @@ class ElectionsDataPreperation:
     def _fillBoolValues(self, data):
         """ replaces Bool columns with 1, 0 and NaN
         """
-        data['Looking_at_poles_int'] = data['Looking_at_poles_results'].map({'Yes': 1, 'No': 0, 'NA': np.nan})
-        data['Married_int'] = data['Married'].map({'Yes': 1, 'No': 0, 'NA': np.nan})
-        data['Gender_int'] = data['Gender'].map({'Male': 1, 'Female': 0, 'NA': np.nan})
-        data['Voting_time_int'] = data['Voting_Time'].map({'After_16:00': 1, 'By_16:00': 0, 'NA': np.nan})
-        data['Financial_agenda_matters_int'] = data['Financial_agenda_matters'].map({'Yes': 1, 'No': 0, 'NA': np.nan})
+        data['Looking_at_poles_int'] = data['Looking_at_poles_results'].map({'Yes': 1, 'No': -1, 'NA': np.nan})
+        data['Married_int'] = data['Married'].map({'Yes': 1, 'No': -1, 'NA': np.nan})
+        data['Gender_int'] = data['Gender'].map({'Male': 1, 'Female': -1, 'NA': np.nan})
+        data['Voting_time_int'] = data['Voting_Time'].map({'After_16:00': 1, 'By_16:00': -1, 'NA': np.nan})
+        data['Financial_agenda_matters_int'] = data['Financial_agenda_matters'].map({'Yes': 1, 'No': -1, 'NA': np.nan})
 
     def _fillTrioValues(self, data):
         data['Will_vote_only_large_party_int'] = data['Will_vote_only_large_party'].map(
-            {'Yes': 2, 'Maybe': 1, 'No': 0, 'NA': np.nan})
+            {'Yes': 1, 'Maybe': 0, 'No': -1, 'NA': np.nan})
         data['Age_group_int'] = data['Age_group'].map(
-            {'Below_30': 25, '30-45': 35, '45_and_up': 45, 'NA': np.nan})
+            {'Below_30': -1, '30-45': 0, '45_and_up': 1, 'NA': np.nan})
 
     def _fillHotSpot(self, data, featureList):
         for feature in featureList:
@@ -299,29 +301,3 @@ if __name__ == '__main__':
     firstSetPrep.trainData.hist(column='Avg_monthly_income_all_years', bins=500)
 
     plt.show()
-
-
-
-
-
-
-
-
-
-
-    #
-    # # sfs first check
-    # from sklearn.ensemble import RandomForestClassifier
-    # rForest = RandomForestClassifier(random_state=0)
-    # from sfs import sequential_forward_selection
-    # _, bestFeatures = sequential_forward_selection(rForest, firstSetPrep.trainData, firstSetPrep.trainLabels, 4)
-    # firstSetPrep.trainData = firstSetPrep.trainData[bestFeatures]
-    #
-    # # sfs second check
-
-
-
-
-
-
-
