@@ -14,12 +14,10 @@ def sequential_forward_selection(clf, X: pd.DataFrame, y: pd.DataFrame, k) -> li
 
     X = X.loc[:, X.columns != 'Unnamed: 0']
     base = [feature for feature in X.keys()]
-    print(base)
     bestIndexes = dict()
     bestScores = dict()
     X = X.as_matrix()
     y = y.as_matrix().ravel()
-    currScore = 0
     for i in range(k):
         bestScore = 0
         for j in range(0, len(base)):
@@ -34,15 +32,17 @@ def sequential_forward_selection(clf, X: pd.DataFrame, y: pd.DataFrame, k) -> li
                 bestIndexes[i] = j
                 bestScores[i] = bestScore
 
-
-        bestFeatures = [base[i] for i in range(len(base)) if i in bestIndexes.values()]
-        print(bestIndexes)
-        print(bestFeatures)
-        print(bestScores)
     indexByOrder = []
     bestFeatures = []
-    for k in bestIndexes.keys():
-        indexByOrder.append(bestIndexes[k])
-        bestFeatures.append(base[bestIndexes[k]])
-    # bestFeatures = [base[i] for i in range(len(base)) if i in indexByOrder]
-    return indexByOrder, bestFeatures
+    for l in bestIndexes.keys():
+        indexByOrder.append(bestIndexes[l])
+        bestFeatures.append(base[bestIndexes[l]])
+
+    return bestIndexes, bestFeatures, bestScores
+
+def sfsAux(clf, X: pd.DataFrame, y: pd.DataFrame, k):
+    bestIndexes, bestFeatures, bestScores = sequential_forward_selection(clf, X, y, k)
+    maxScoreIndex = max(bestScores.items(), key=lambda x: x[1])[0]
+    return [bestFeatures[x] for x in range(maxScoreIndex + 1)]
+
+
