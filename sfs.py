@@ -35,6 +35,7 @@ def sequential_forward_selection(clf, X: pd.DataFrame, y: pd.DataFrame, k) -> li
 
     indexByOrder = []
     bestFeatures = []
+    print(bestScores)
     for l in bestIndexes.keys():
         indexByOrder.append(bestIndexes[l])
         bestFeatures.append(base[bestIndexes[l]])
