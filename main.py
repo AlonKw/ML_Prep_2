@@ -1,8 +1,10 @@
+import os
 from enum import Enum
 
 import pandas as pd
 
 import Consts
+import relief
 from Consts import RAW_FILE_PATH, RAW_SPLIT_FILE_PATH
 from ElectionsDataPreperation import ElectionsDataPreperation as EDP, DataSplit
 from scale_data import ScaleData
@@ -14,10 +16,11 @@ class Stages:
     do_print = True
     do_get_raw_data = False
     do_load_and_impute = False
-    do_scale = True
-    do_feature_selection = False
+    do_scale = False
+    do_feature_selection = True
     do_removeAbove95Corr = False
-    do_sfs = False
+    do_sfs = True
+    do_relief = True
     get_correlations = True
 
 amount_of_sets = 1
@@ -93,6 +96,8 @@ def main():
 
 
     if Stages.do_feature_selection:
+        if Stages.do_print:
+            print("Stage 4: Selecting relevant features")
         # relief + sfs + correlation matrix
         for i in range(1, amount_of_sets + 1):
             # load the data from the previous stage
@@ -102,7 +107,21 @@ def main():
                                          RAW_SPLIT_FILE_PATH.format(i, "Y_train", "{}Numeric".format(i)),
                                          RAW_SPLIT_FILE_PATH.format(i, "Y_val", "{}Numeric".format(i)),
                                          RAW_SPLIT_FILE_PATH.format(i, "Y_test", "{}Numeric".format(i)))
+            secondStepPrep_dict[i].loadData(Consts.listAdditionalDataPreparation)
 
+            if Stages.do_relief:
+                relief_dir = 'datasets\\{}\\'.format(i)
+                N = 100
+                tau = 0
+                print(secondStepPrep_dict[i].trainData.keys())
+                relief_chosen_set = relief.relief_alg(secondStepPrep_dict[i].trainData,
+                                                      secondStepPrep_dict[i].trainLabels, N, tau)
+                pd.DataFrame([f for f in relief_chosen_set]).to_csv(
+                        relief_dir + "N_{}_tau_{}.csv".format(N, tau))
+                secondStepPrep_dict[i].trainData = secondStepPrep_dict[i].trainData[relief_chosen_set]
+                secondStepPrep_dict[i].valData = secondStepPrep_dict[i].valData[relief_chosen_set]
+                secondStepPrep_dict[i].testData = secondStepPrep_dict[i].testData[relief_chosen_set]
+                print(secondStepPrep_dict[i].trainData.keys())
             # Remove features with a very high correlation
             if Stages.do_removeAbove95Corr:
                 secondStepPrep_dict[i].removeAbove95Corr()
