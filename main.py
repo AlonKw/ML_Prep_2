@@ -9,6 +9,7 @@ from Consts import RAW_FILE_PATH, RAW_SPLIT_FILE_PATH
 from ElectionsDataPreperation import ElectionsDataPreperation as EDP, DataSplit
 from scale_data import ScaleData
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sfs import sfsAux
 
 class Stages:
