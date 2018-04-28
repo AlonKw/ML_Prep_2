@@ -77,15 +77,15 @@ class ElectionsDataPreperation:
         After the change, the files are saved with Numeric suffix
         """
         self._changeStringToValuesAux(self.trainData, self.sInputFileTrain)
-        self._fillBoolValues(self.trainData)
-        self._fillTrioValues(self.trainData)
-        self._fillHotSpot(self.trainData, Consts.listSymbolicColumns)
-        # remove previous columns containing strings
-        self.trainData = self.trainData.drop(Consts.listNonNumeric, axis=1)
-        self.trainData = self.trainData.drop(self.trainData.columns[0], axis=1)
-        ElectionsDataPreperation.fixNegativeVals(self.trainData)
-        trainPath = self.sInputFileTrain + 'Numeric.csv'
-        self.trainData.to_csv(trainPath)
+        # self._fillBoolValues(self.trainData)
+        # self._fillTrioValues(self.trainData)
+        # self._fillHotSpot(self.trainData, Consts.listSymbolicColumns)
+        # # remove previous columns containing strings
+        # self.trainData = self.trainData.drop(Consts.listNonNumeric, axis=1)
+        # self.trainData = self.trainData.drop(self.trainData.columns[0], axis=1)
+        # ElectionsDataPreperation.fixNegativeVals(self.trainData)
+        # trainPath = self.sInputFileTrain + 'Numeric.csv'
+        # self.trainData.to_csv(trainPath)
 
         if ('test' in lDataTypes):
             self._changeStringToValuesAux(self.testData, self.sInputFileTest)
@@ -172,9 +172,11 @@ class ElectionsDataPreperation:
 
             destination = trainDataArray[nearestRowDict[index]]
             source[source_null_indexes] = destination[source_null_indexes]
+            imputeDataArray[index] = source
             # print(source)
-            # print(index.__repr__() + ' ' + nearestRowDict[index].__repr__())
-        print(sFileName)
+            print(index.__repr__() + ' ' + nearestRowDict[index].__repr__())
+        # print(sFileName)
+        imputeData = pd.DataFrame(imputeDataArray, columns=imputeData.columns.values)
         imputeData.to_csv(sFileName + 'No_Nan.csv')
 
     def _fillBoolValues(self, data):
@@ -312,15 +314,18 @@ class DataSplit:
 
 if __name__ == '__main__':
 
-    firstSetPrep = ElectionsDataPreperation('datasets/1/X_train1', 'datasets/1/X_val1',
-                                            'datasets/1/X_test1', 'datasets/1/Y_train1',
+    firstSetPrep = ElectionsDataPreperation('datasets/1/X_train1No_Nan', 'datasets/1/X_val1',
+                                            'datasets/1/X_test1Numeric - Copy', 'datasets/1/Y_train1',
                                             'datasets/1/Y_val1', 'datasets/1/Y_test1')
 
-    firstSetPrep.loadAndImpute(['test', 'validation'])
+    firstSetPrep.loadData(Consts.listAdditionalDataPreparation)
+    firstSetPrep._dataImpute(firstSetPrep.trainData, firstSetPrep.testData, 'datasets/1/X_test1-copy')
 
-    from sklearn.ensemble import RandomForestClassifier
-    rClf = RandomForestClassifier()
-    from sfs import sfsAux
-    bestFeatures = sfsAux(rClf, firstSetPrep.trainData, firstSetPrep.trainLabels, 23)
-    firstSetPrep.trainData = firstSetPrep.trainData[bestFeatures]
+
+
+
+
+
+
+
 
