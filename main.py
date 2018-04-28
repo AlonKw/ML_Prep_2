@@ -21,7 +21,7 @@ class Stages:
     do_removeAbove95Corr = False
     do_sfs = True
     do_relief = True
-    get_correlations = True
+    get_correlations = False
 
 amount_of_sets = 1
 
@@ -108,12 +108,15 @@ def main():
                                          RAW_SPLIT_FILE_PATH.format(i, "Y_val", "{}Numeric".format(i)),
                                          RAW_SPLIT_FILE_PATH.format(i, "Y_test", "{}Numeric".format(i)))
             secondStepPrep_dict[i].loadData(Consts.listAdditionalDataPreparation)
+            secondStepPrep_dict[i].trainLabels = secondStepPrep_dict[i].trainLabels["Vote"]
+            secondStepPrep_dict[i].valLabels = secondStepPrep_dict[i].valLabels["Vote"]
+            secondStepPrep_dict[i].testLabels = secondStepPrep_dict[i].testLabels["Vote"]
 
             if Stages.do_relief:
                 relief_dir = 'datasets\\{}\\'.format(i)
-                N = 100
+                N = 1000
                 tau = 0
-                print(secondStepPrep_dict[i].trainData.keys())
+
                 relief_chosen_set = relief.relief_alg(secondStepPrep_dict[i].trainData,
                                                       secondStepPrep_dict[i].trainLabels, N, tau)
                 pd.DataFrame([f for f in relief_chosen_set]).to_csv(
@@ -121,7 +124,6 @@ def main():
                 secondStepPrep_dict[i].trainData = secondStepPrep_dict[i].trainData[relief_chosen_set]
                 secondStepPrep_dict[i].valData = secondStepPrep_dict[i].valData[relief_chosen_set]
                 secondStepPrep_dict[i].testData = secondStepPrep_dict[i].testData[relief_chosen_set]
-                print(secondStepPrep_dict[i].trainData.keys())
             # Remove features with a very high correlation
             if Stages.do_removeAbove95Corr:
                 secondStepPrep_dict[i].removeAbove95Corr()
@@ -132,6 +134,7 @@ def main():
                 max_amount_of_features = 23
                 bestFeatures = sfsAux(rClf, secondStepPrep_dict[i].trainData, secondStepPrep_dict[i].trainLabels,
                                       max_amount_of_features)
+                print("Sfs chose: {}".format(",".join(bestFeatures)))
                 secondStepPrep_dict[i].trainData = secondStepPrep_dict[i].trainData[bestFeatures]
                 secondStepPrep_dict[i].valData = secondStepPrep_dict[i].valData[bestFeatures]
                 secondStepPrep_dict[i].testData = secondStepPrep_dict[i].testData[bestFeatures]
