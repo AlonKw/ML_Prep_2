@@ -9,6 +9,7 @@ from Consts import RAW_FILE_PATH, RAW_SPLIT_FILE_PATH
 from ElectionsDataPreperation import ElectionsDataPreperation as EDP, DataSplit
 from scale_data import ScaleData
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sfs import sfsAux
 
 class Stages:
@@ -114,7 +115,7 @@ def main():
 
             if Stages.do_relief:
                 relief_dir = 'datasets\\{}\\'.format(i)
-                N = 1000
+                N = 100
                 tau = 0
 
                 relief_chosen_set = relief.relief_alg(secondStepPrep_dict[i].trainData,
@@ -128,8 +129,13 @@ def main():
             if Stages.do_removeAbove95Corr:
                 secondStepPrep_dict[i].removeAbove95Corr()
 
-            # create a random forest for the sfs
+            trainData = secondStepPrep_dict[i].trainData.copy()
+            valData = secondStepPrep_dict[i].valData.copy()
+            testData = secondStepPrep_dict[i].testData.copy()
+
+
             if Stages.do_sfs:
+                # create a random forest for the sfs
                 rClf = RandomForestClassifier()
                 max_amount_of_features = 23
                 bestFeatures = sfsAux(rClf, secondStepPrep_dict[i].trainData, secondStepPrep_dict[i].trainLabels,
@@ -138,10 +144,25 @@ def main():
                 secondStepPrep_dict[i].trainData = secondStepPrep_dict[i].trainData[bestFeatures]
                 secondStepPrep_dict[i].valData = secondStepPrep_dict[i].valData[bestFeatures]
                 secondStepPrep_dict[i].testData = secondStepPrep_dict[i].testData[bestFeatures]
-                pd.DataFrame(bestFeatures).to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_chosen_features",i))
-                secondStepPrep_dict[i].trainData.to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_chosen_train",i))
-                secondStepPrep_dict[i].valData.to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_val_chosen",i))
-                secondStepPrep_dict[i].testData.to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_test_chosen",i))
+                pd.DataFrame(bestFeatures).to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_chosen_features_random_forest",i))
+                secondStepPrep_dict[i].trainData.to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_chosen_train_random_forest",i))
+                secondStepPrep_dict[i].valData.to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_val_chosen_random_forest",i))
+                secondStepPrep_dict[i].testData.to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_test_chosen_random_forest",i))
+
+                # create svm for the sfs
+
+                svm = SVC()
+                bestFeatures = sfsAux(rClf, trainData, secondStepPrep_dict[i].trainLabels,
+                                      max_amount_of_features)
+                print("Sfs chose: {}".format(",".join(bestFeatures)))
+                trainData = trainData[bestFeatures]
+                valData = valData[bestFeatures]
+                testData = testData[bestFeatures]
+                pd.DataFrame(bestFeatures).to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_chosen_features_svm",i))
+                trainData.to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_chosen_features_svm",i))
+                valData.to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_chosen_features_svm",i))
+                testData.to_csv(RAW_SPLIT_FILE_PATH.format(i,"Best_chosen_features_svm",i))
+
 
 
 
